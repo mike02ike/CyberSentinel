@@ -1,11 +1,20 @@
 import breach_checker, pass_monitor, nw_monitor, phishing_analyzer, readchar
+
 def boxed(text):
+    """
+    Prints the given text inside a box made of ASCII characters.
+    
+    Args:
+        text (str): The text to be boxed.
+    """
     width = len(text) + 4  # 2 spaces + 2 borders
     print("\n\n+" + "-" * (width - 2) + "+")
     print(f"| {text} |")
     print("+" + "-" * (width - 2) + "+")
 
 def display_menu():
+    """
+    Displays the main menu and handles user input."""
     try:
         boxed("Main Menu")
         print("\nSelect an option (1-5):\n\n1. Email Breach Check\n2. Password Monitor\n3. Network Monitor\n4. Phishing Analyzer\n5. Quit")
@@ -37,6 +46,8 @@ def display_menu():
         print(e)
     
 def menu():
+    """
+    Main function to run the menu loop."""
     boxed("Welcome to CyberSentinel!")
     
     while True:
