@@ -230,12 +230,34 @@ def scan_nw(network="192.168.1.0/24", known_macs=None):
             except nmap.PortScannerError as e:
                 print(f"Error during OS detection on {ip}: {e}")
                 os_guess = 'Unknown'
-            os_guess = os_scanner[ip]['osmatch'][0]['name'] if os_scanner[ip].get('osmatch') else 'Unknown'
+            if ip in os_scanner.all_hosts() and os_scanner[ip].get('osmatch'):
+                os_guess = os_scanner[ip]['osmatch'][0]['name']
+            else:
+                os_guess = 'Unknown'
             known_macs.add(mac)
         # known device
         elif mac:
-            # print(f"Skipping OS detection on known device {ip} (MAC: {mac})...")
-            os_guess = get_previous_os(mac)
+            previous_os = get_previous_os(mac)
+            
+            # only run OS detection if OS is 'Unknown' or None
+            if previous_os == 'Unknown' or previous_os is None:
+                # run OS detection for this known device
+                # print(f"Running OS detection on {ip} (MAC: {mac})...")
+                os_scanner = nmap.PortScanner()
+                try:
+                    os_scanner.scan(hosts=ip, arguments='-O', sudo=True)
+                    if ip in os_scanner.all_hosts() and os_scanner[ip].get('osmatch'):
+                        os_guess = os_scanner[ip]['osmatch'][0]['name']
+                    # scan failed or no OS match found
+                    else:
+                        os_guess = 'Unknown'
+                except nmap.PortScannerError as e:
+                    print(f"Error during OS detection on {ip}: {e}")
+                    os_guess = 'Unknown'
+            # OS is known
+            else:
+                os_guess = previous_os
+        # no MAC address found
         else:
             # print(f"Skipping OS detection on {ip} (no MAC address found)...")
             os_guess = 'Unknown'
